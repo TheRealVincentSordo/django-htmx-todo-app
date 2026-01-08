@@ -25,10 +25,22 @@
     </span>
 
     <!-- Created At -->
-    <span
-      class="flex-1 text-lg {% if t.done %}line-through text-gray-300{% else %}text-gray-700{% endif %} transition-colors">
-      {{ t.created_at }}
-    </span>
+    <div class="flex flex-col items-end">
+      <span class="text-sm {% if t.done %}text-gray-300{% else %}text-gray-400{% endif %}">
+        {{ t.created_at|date:"M d, Y" }}
+      </span>
+      {% if t.done %}
+      {% if t.completed_at %}
+      <span class="text-xs font-medium text-green-500">
+        Completed: {{ t.completed_at|date:"M d, Y H:i" }}
+      </span>
+      {% endif %}
+      {% elif t.due_date %}
+      <span class="text-xs font-medium text-blue-500" data-countdown="{{ t.due_date.isoformat }}">
+        Loading...
+      </span>
+      {% endif %}
+    </div>
 
     <!-- Delete Form -->
     <form hx-post="{% url 'todos:delete' t.id %}" hx-target="#todo-list" hx-swap="innerHTML"
@@ -53,6 +65,7 @@
   </div>
 
   <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden mb-10">
-    <div class="h-full bg-[#f87171] transition-all duration-500 ease-out" style="width: {{ percent }}%"></div>
+    <div class="h-full bg-[#f87171] transition-all duration-500 ease-out" style="width: {{ percent|default:0 }}%;">
+    </div>
   </div>
 </div>

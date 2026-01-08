@@ -39,21 +39,29 @@
 
         <!-- Progress Bar -->
         <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden mb-10">
-          <div class="h-full bg-[#f87171] transition-all duration-500 ease-out" style="width: {{ percent }}%"></div>
+          <div class="h-full bg-[#f87171] transition-all duration-500 ease-out"
+            style="width: {{ percent|default:0 }}%;"></div>
         </div>
       </div>
     </div>
 
     <!-- Add Todo Form -->
     <form hx-post="{% url 'todos:add' %}" hx-target="#todo-list" hx-swap="innerHTML" hx-on::after-request="this.reset()"
-      class="relative mb-6 group">
+      class="mb-6 group">
       {% csrf_token %}
-      <input name="text" type="text" placeholder="Add a new task..." autocomplete="off"
-        class="w-full p-5 pr-16 rounded-2xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.04)] focus:ring-0 focus:outline-none placeholder-gray-400 text-lg transition-shadow group-hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]" />
-      <button type="submit"
-        class="absolute right-3 top-1/2 -translate-y-1/2 bg-[#f4baba] hover:bg-[#f2a6a6] text-white p-2 rounded-xl transition-colors">
-        <i data-lucide="plus" class="w-6 h-6"></i>
-      </button>
+      <div class="relative">
+        <input name="text" type="text" placeholder="Add a new task..." autocomplete="off"
+          class="w-full p-5 pr-16 rounded-2xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.04)] focus:ring-0 focus:outline-none placeholder-gray-400 text-lg transition-shadow group-hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]" />
+        <button type="submit"
+          class="absolute right-3 top-1/2 -translate-y-1/2 bg-[#f4baba] hover:bg-[#f2a6a6] text-white p-2 rounded-xl transition-colors">
+          <i data-lucide="plus" class="w-6 h-6"></i>
+        </button>
+      </div>
+      <div class="mt-2 flex items-center gap-2 text-sm text-gray-500">
+        <label for="due_date">Due date:</label>
+        <input id="due_date" name="due_date" type="datetime-local"
+          class="bg-transparent border-none focus:ring-0 p-0" />
+      </div>
     </form>
 
     <!-- Todo List -->
@@ -70,6 +78,40 @@
     document.body.addEventListener('htmx:afterSwap', function (evt) {
       lucide.createIcons();
     });
+
+    // Countdown Timer Logic
+    function updateCountdowns() {
+      const now = new Date();
+      document.querySelectorAll('[data-countdown]').forEach(el => {
+        const dueStr = el.getAttribute('data-countdown');
+        if (!dueStr) return;
+
+        const due = new Date(dueStr);
+        const diff = due - now;
+
+        if (diff <= 0) {
+          el.textContent = "Overdue";
+          el.classList.add("text-red-500");
+          return;
+        }
+
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        let text = "";
+        if (days > 0) text += `${days}d `;
+        if (hours > 0) text += `${hours}h `;
+        if (minutes > 0) text += `${minutes}m `;
+        text += `${seconds}s`;
+
+        el.textContent = text;
+      });
+    }
+
+    setInterval(updateCountdowns, 1000);
+    updateCountdowns(); // Initial call
   </script>
 </body>
 

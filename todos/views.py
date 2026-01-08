@@ -1,4 +1,5 @@
 from django.http import HttpRequest, HttpResponse
+from django.utils import timezone
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -21,8 +22,9 @@ def index(request: HttpRequest) -> HttpResponse:
 @require_POST
 def add_todo(request: HttpRequest) -> HttpResponse:
     text = (request.POST.get("text") or "").strip()
+    due_date = request.POST.get("due_date")
     if text:
-        Todo.objects.create(text=text)
+        Todo.objects.create(text=text, due_date=due_date or None)
 
     if request.htmx:
         stats = get_stats()
@@ -34,7 +36,11 @@ def add_todo(request: HttpRequest) -> HttpResponse:
 def toggle_todo(request: HttpRequest, todo_id: int) -> HttpResponse:
     todo = get_object_or_404(Todo, id=todo_id)
     todo.done = not todo.done
-    todo.save(update_fields=["done"])
+    if todo.done:
+        todo.completed_at = timezone.now()
+    else:
+        todo.completed_at = None
+    todo.save(update_fields=["done", "completed_at"])
 
     if request.htmx:
         stats = get_stats()
