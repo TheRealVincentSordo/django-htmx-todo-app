@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HTMX Todo</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <style>
+      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 40px; max-width: 720px; }
+      form { display: flex; gap: 10px; margin-bottom: 16px; }
+      input[type="text"] { flex: 1; padding: 10px; }
+      button { padding: 10px 14px; cursor: pointer; }
+      ul { list-style: none; padding: 0; margin: 0; }
+      li { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 8px; }
+      .done { text-decoration: line-through; opacity: 0.6; }
+      .spacer { flex: 1; }
+      .pill { font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid #ddd; }
+    </style>
+  </head>
+
+  <body>
+    <h1>Todo</h1>
+
+    <form
+      hx-post="{% url 'todos:add' %}"
+      hx-target="#todo-list"
+      hx-swap="innerHTML"
+      hx-on::after-request="this.reset()"
+    >
+      {% csrf_token %}
+      <input name="text" type="text" placeholder="Add a todo..." autocomplete="off" />
+      <button type="submit">Add</button>
+    </form>
+
+    <div id="todo-list">
+      {% include "todos/_todo_list.html" %}
+    </div>
+  </body>
+</html>
