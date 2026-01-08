@@ -1,39 +1,76 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>HTMX Todo</title>
-    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
-    <style>
-      body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 40px; max-width: 720px; }
-      form { display: flex; gap: 10px; margin-bottom: 16px; }
-      input[type="text"] { flex: 1; padding: 10px; }
-      button { padding: 10px 14px; cursor: pointer; }
-      ul { list-style: none; padding: 0; margin: 0; }
-      li { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 8px; }
-      .done { text-decoration: line-through; opacity: 0.6; }
-      .spacer { flex: 1; }
-      .pill { font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid #ddd; }
-    </style>
-  </head>
+<html lang="en">
 
-  <body>
-    <h1>Todo</h1>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HTMX Todo</title>
 
-    <form
-      hx-post="{% url 'todos:add' %}"
-      hx-target="#todo-list"
-      hx-swap="innerHTML"
-      hx-on::after-request="this.reset()"
-    >
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+
+  <style>
+    /* Custom styles */
+  </style>
+</head>
+
+<body class="bg-[#FAFAFA] min-h-screen flex items-center justify-center py-10 px-4 font-sans text-gray-800">
+
+  <div class="w-full max-w-xl">
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold mb-2 tracking-tight text-[#1a1a1a]">Today's Tasks</h1>
+
+      <!-- Stats and Progress Bar Container -->
+      <!-- We use an ID here to target it with OOB swaps from the list response -->
+      <div id="stats-container">
+        <div class="flex items-center justify-center gap-2 text-gray-400 mb-6">
+          <!-- Check Icon -->
+          <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+          <span class="text-lg font-medium">{{ completed }} of {{ total }} completed</span>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden mb-10">
+          <div class="h-full bg-[#f87171] transition-all duration-500 ease-out" style="width: {{ percent }}%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Todo Form -->
+    <form hx-post="{% url 'todos:add' %}" hx-target="#todo-list" hx-swap="innerHTML" hx-on::after-request="this.reset()"
+      class="relative mb-6 group">
       {% csrf_token %}
-      <input name="text" type="text" placeholder="Add a todo..." autocomplete="off" />
-      <button type="submit">Add</button>
+      <input name="text" type="text" placeholder="Add a new task..." autocomplete="off"
+        class="w-full p-5 pr-16 rounded-2xl border-none shadow-[0_2px_8px_rgba(0,0,0,0.04)] focus:ring-0 focus:outline-none placeholder-gray-400 text-lg transition-shadow group-hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)]" />
+      <button type="submit"
+        class="absolute right-3 top-1/2 -translate-y-1/2 bg-[#f4baba] hover:bg-[#f2a6a6] text-white p-2 rounded-xl transition-colors">
+        <i data-lucide="plus" class="w-6 h-6"></i>
+      </button>
     </form>
 
-    <div id="todo-list">
+    <!-- Todo List -->
+    <div id="todo-list" class="space-y-3">
       {% include "todos/_todo_list.html" %}
     </div>
-  </body>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Re-initialize icons after HTMX swaps
+    document.body.addEventListener('htmx:afterSwap', function (evt) {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+
 </html>

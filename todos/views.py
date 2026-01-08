@@ -5,9 +5,17 @@ from django.views.decorators.http import require_POST
 from .models import Todo
 
 
+def get_stats():
+    total = Todo.objects.count()
+    completed = Todo.objects.filter(done=True).count()
+    percent = int((completed / total * 100)) if total > 0 else 0
+    return {"total": total, "completed": completed, "percent": percent}
+
+
 def index(request: HttpRequest) -> HttpResponse:
     todos = Todo.objects.all()
-    return render(request, "todos/index.html", {"todos": todos})
+    stats = get_stats()
+    return render(request, "todos/index.html", {"todos": todos, **stats})
 
 
 @require_POST
@@ -17,7 +25,8 @@ def add_todo(request: HttpRequest) -> HttpResponse:
         Todo.objects.create(text=text)
 
     if request.htmx:
-        return render(request, "todos/_todo_list.html", {"todos": Todo.objects.all()})
+        stats = get_stats()
+        return render(request, "todos/_todo_list.html", {"todos": Todo.objects.all(), **stats})
     return redirect("todos:index")
 
 
@@ -28,7 +37,8 @@ def toggle_todo(request: HttpRequest, todo_id: int) -> HttpResponse:
     todo.save(update_fields=["done"])
 
     if request.htmx:
-        return render(request, "todos/_todo_list.html", {"todos": Todo.objects.all()})
+        stats = get_stats()
+        return render(request, "todos/_todo_list.html", {"todos": Todo.objects.all(), **stats})
     return redirect("todos:index")
 
 
@@ -38,6 +48,7 @@ def delete_todo(request: HttpRequest, todo_id: int) -> HttpResponse:
     todo.delete()
 
     if request.htmx:
-        return render(request, "todos/_todo_list.html", {"todos": Todo.objects.all()})
+        stats = get_stats()
+        return render(request, "todos/_todo_list.html", {"todos": Todo.objects.all(), **stats})
     return redirect("todos:index")
     

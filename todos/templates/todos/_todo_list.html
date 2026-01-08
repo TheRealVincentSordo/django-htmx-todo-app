@@ -1,31 +1,58 @@
 <ul>
   {% for t in todos %}
-    <li>
-      <form
-        hx-post="{% url 'todos:toggle' t.id %}"
-        hx-target="#todo-list"
-        hx-swap="innerHTML"
-      >
-        {% csrf_token %}
-        <input type="checkbox" {% if t.done %}checked{% endif %} onchange="this.form.requestSubmit()" />
-      </form>
+  <li
+    class="bg-white p-4 rounded-xl shadow-sm mb-3 flex items-center gap-4 group transition-shadow hover:shadow-md border border-gray-100">
+    <!-- Toggle Form -->
+    <form hx-post="{% url 'todos:toggle' t.id %}" hx-target="#todo-list" hx-swap="innerHTML"
+      class="m-0 flex items-center">
+      {% csrf_token %}
+      <label class="cursor-pointer relative flex items-center justify-center">
+        <input type="checkbox" {% if t.done %}checked{% endif %} onchange="this.form.requestSubmit()"
+          class="peer sr-only" />
+        <!-- Custom Checkbox UI -->
+        <div
+          class="w-6 h-6 border-2 border-gray-200 rounded-full peer-checked:bg-[#f87171] peer-checked:border-[#f87171] transition-colors">
+        </div>
+        <i data-lucide="check"
+          class="w-4 h-4 text-white absolute opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+      </label>
+    </form>
 
-      <span class="{% if t.done %}done{% endif %}">{{ t.text }}</span>
+    <!-- Text -->
+    <span
+      class="flex-1 text-lg {% if t.done %}line-through text-gray-300{% else %}text-gray-700{% endif %} transition-colors">
+      {{ t.text }}
+    </span>
 
-      <span class="spacer"></span>
+    <!-- Created At -->
+    <span
+      class="flex-1 text-lg {% if t.done %}line-through text-gray-300{% else %}text-gray-700{% endif %} transition-colors">
+      {{ t.created_at }}
+    </span>
 
-      <span class="pill">{% if t.done %}done{% else %}open{% endif %}</span>
-
-      <form
-        hx-post="{% url 'todos:delete' t.id %}"
-        hx-target="#todo-list"
-        hx-swap="innerHTML"
-      >
-        {% csrf_token %}
-        <button type="submit">Delete</button>
-      </form>
-    </li>
+    <!-- Delete Form -->
+    <form hx-post="{% url 'todos:delete' t.id %}" hx-target="#todo-list" hx-swap="innerHTML"
+      class="m-0 opacity-0 group-hover:opacity-100 transition-opacity">
+      {% csrf_token %}
+      <button type="submit" class="text-gray-300 hover:text-red-400 transition-colors p-1">
+        <i data-lucide="trash-2" class="w-5 h-5"></i>
+      </button>
+    </form>
+  </li>
   {% empty %}
-    <li>No todos yet.</li>
+  <li class="text-center text-gray-400 py-8">No tasks yet. Add one above!</li>
   {% endfor %}
 </ul>
+
+<!-- HTMX Out-Of-Band Swap for Stats -->
+<!-- This div will replace the #stats-container in index.html whenever this template is rendered -->
+<div id="stats-container" hx-swap-oob="true">
+  <div class="flex items-center justify-center gap-2 text-gray-400 mb-6">
+    <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+    <span class="text-lg font-medium">{{ completed }} of {{ total }} completed</span>
+  </div>
+
+  <div class="h-2 w-full bg-gray-200 rounded-full overflow-hidden mb-10">
+    <div class="h-full bg-[#f87171] transition-all duration-500 ease-out" style="width: {{ percent }}%"></div>
+  </div>
+</div>
