@@ -6,6 +6,7 @@ class Todo(models.Model):
     text = models.CharField(max_length=255)
     done = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    user_id = models.CharField(max_length=255, blank=True)
 
     class Meta:
         ordering = ["-created_at"]

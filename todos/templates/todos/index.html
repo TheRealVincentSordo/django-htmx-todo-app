@@ -15,11 +15,24 @@
       .done { text-decoration: line-through; opacity: 0.6; }
       .spacer { flex: 1; }
       .pill { font-size: 12px; padding: 3px 8px; border-radius: 999px; border: 1px solid #ddd; }
+      .header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+      .header h1 { margin: 0; }
+      .user-meta { font-size: 14px; color: #444; }
     </style>
   </head>
 
   <body>
-    <h1>Todo</h1>
+    <div class="header">
+      <div>
+        <h1>Todo</h1>
+        <div class="user-meta">Signed in as {{ supabase_user.email }}</div>
+      </div>
+      <span class="spacer"></span>
+      <form method="post" action="{% url 'todos:logout' %}">
+        {% csrf_token %}
+        <button type="submit">Log out</button>
+      </form>
+    </div>
 
     <form
       hx-post="{% url 'todos:add' %}"

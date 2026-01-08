@@ -1,2 +1,4 @@
 django==5.2.10
 django-htmx
+PyJWT==2.8.0
+supabase==2.6.0
